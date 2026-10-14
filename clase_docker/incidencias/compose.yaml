@@ -1,0 +1,27 @@
+services:
+  db:
+    image: postgres:18-alpine
+    network_mode: host
+    environment:
+      POSTGRES_USER: incidencias
+      POSTGRES_PASSWORD: incidencias
+      POSTGRES_DB: incidencias
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U incidencias -d incidencias -h localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    network_mode: host
+    environment:
+      DATABASE_URL: postgresql+psycopg://incidencias:incidencias@127.0.0.1:5432/incidencias
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
